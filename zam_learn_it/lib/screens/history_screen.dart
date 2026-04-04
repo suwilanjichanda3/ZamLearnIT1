@@ -168,12 +168,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // Go back to translate screen
+                Navigator.pop(context);
               },
-              icon: const Icon(Icons.translate),
-              label: const Text('Start Translating'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _darkBlue,
                 foregroundColor: Colors.white,
@@ -181,6 +179,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
+              child: const Text('Start Translating'),
             ),
           ],
         ),
@@ -224,20 +223,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           color: _lightBlue.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.flag, size: 14, color: _darkBlue),
-                            const SizedBox(width: 4),
-                            Text(
-                              language.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: _darkBlue,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          language.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: _darkBlue,
+                          ),
                         ),
                       ),
                       if (timestamp != null)
@@ -250,68 +242,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   
                   const SizedBox(height: 12),
                   
-                  // Original English text
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.translate, size: 14, color: Colors.grey),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          original,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ],
+                  // Original English text - REMOVED ICON
+                  Text(
+                    original,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
                   
                   const SizedBox(height: 8),
                   
-                  // Arrow down icon
-                  Padding(
-                    padding: const EdgeInsets.only(left: 24),
-                    child: Icon(Icons.arrow_downward, size: 14, color: Colors.grey.shade400),
-                  ),
+                  // Arrow down icon (kept for visual flow)
+                  Icon(Icons.arrow_downward, size: 14, color: Colors.grey.shade400),
                   
                   const SizedBox(height: 8),
                   
-                  // Translated text
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: _lightBlue.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(Icons.volume_up, size: 14, color: _darkBlue),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          translated,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: _darkBlue,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
+                  // Translated text - REMOVED ICON
+                  Text(
+                    translated,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: _darkBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),

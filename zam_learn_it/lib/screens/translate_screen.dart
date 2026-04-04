@@ -230,35 +230,33 @@ class _TranslateScreenState extends State<TranslateScreen> {
                             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             elevation: 2,
                             child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: _lightBlue.withOpacity(0.2),
-                                child: Icon(Icons.translate, color: _darkBlue, size: 18),
-                              ),
+                              // REMOVED THE LEADING CIRCLE AVATAR ICON
                               title: Text(
                                 item['original'] ?? item['original_text'] ?? 'Unknown',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  const SizedBox(height: 4),
                                   Text(
                                     item['translated'] ?? item['translated_text'] ?? '',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(fontSize: 13, color: _darkBlue),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: _lightBlue.withOpacity(0.1),
+                                      color: _lightBlue.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       item['language']?.toUpperCase() ?? 'UNKNOWN',
-                                      style: TextStyle(fontSize: 9, color: _darkBlue, fontWeight: FontWeight.w500),
+                                      style: TextStyle(fontSize: 10, color: _darkBlue, fontWeight: FontWeight.w500),
                                     ),
                                   ),
                                 ],
@@ -267,11 +265,11 @@ class _TranslateScreenState extends State<TranslateScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.volume_up, size: 18, color: _darkBlue),
+                                    icon: Icon(Icons.volume_up, size: 20, color: _darkBlue),
                                     onPressed: () => _speakText(item['translated'] ?? '', item['language'] ?? 'bemba'),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.copy, size: 18, color: _darkBlue),
+                                    icon: Icon(Icons.copy, size: 20, color: _darkBlue),
                                     onPressed: () {
                                       _showSnackBar('Copied to clipboard!', Colors.grey);
                                     },
@@ -324,11 +322,6 @@ class _TranslateScreenState extends State<TranslateScreen> {
             ),
             const Divider(),
             ..._languages.map((lang) => ListTile(
-                  leading: Icon(
-                    lang == 'bemba' ? Icons.people : Icons.language,
-                    color: _selectedLanguage == lang ? _darkBlue : Colors.grey,
-                    size: 22,
-                  ),
                   title: Text(
                     lang.toUpperCase(),
                     style: TextStyle(
@@ -336,6 +329,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                       color: _selectedLanguage == lang ? _darkBlue : Colors.black87,
                       fontSize: 14,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   trailing: _selectedLanguage == lang ? Icon(Icons.check, color: _darkBlue, size: 20) : null,
                   onTap: () {
