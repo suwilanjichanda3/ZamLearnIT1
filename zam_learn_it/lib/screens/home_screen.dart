@@ -246,7 +246,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "© 2024 ZamLearnIT - All Rights Reserved",
+                        "© 2026 ZamLearnIT - All Rights Reserved",
                         style: TextStyle(
                           color: Colors.blue.withOpacity(0.7),
                           fontSize: 10,
