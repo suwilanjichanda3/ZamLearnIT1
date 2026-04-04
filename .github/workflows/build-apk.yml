@@ -1,0 +1,38 @@
+name: Build ZamLearnIT APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+    
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: zam_learn_it/  # Change to your Flutter project folder
+    
+    - name: Build APK
+      run: flutter build apk --release
+      working-directory: zam_learn_it/
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: zamlearnit-apk
+        path: zam_learn_it/build/app/outputs/flutter-apk/*.apk
