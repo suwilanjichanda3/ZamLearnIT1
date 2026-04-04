@@ -1,0 +1,126 @@
+# ===========================================
+# ZamLearnIT - Git Ignore File
+# ===========================================
+
+# Flutter/Dart
+.dart_tool/
+.pub/
+.pub-cache/
+build/
+*.lock
+*.log
+*.pid
+
+# Android
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/.gradle/
+android/local.properties
+android/*.iml
+
+# iOS
+ios/.symlinks/
+ios/Pods/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/*.iml
+
+# Windows
+windows/flutter/ephemeral/
+windows/.vs/
+windows/GeneratedPluginRegistrant.h
+
+# macOS
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Web
+web/
+
+# ===========================================
+# Python Backend
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ===========================================
+# Database Files (IMPORTANT!)
+# ===========================================
+*.db
+*.sqlite
+*.sqlite3
+translations.db
+
+# ===========================================
+# Environment & Secrets
+# ===========================================
+.env
+.env.local
+.env.*.local
+secrets.yaml
+config.yaml
+
+# ===========================================
+# IDE & Editor Files
+# ===========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================================
+# Model Files (Large files)
+# ===========================================
+*.bin
+*.safetensors
+*.pth
+*.onnx
+models/
+cache/
+
+# ===========================================
+# Logs & Temp Files
+# ===========================================
+*.log
+*.tmp
+*.temp
+*.cache
+logs/
+temp/
+
+# ===========================================
+# OS Specific
+# ===========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===========================================
+# Flutter Generated Files
+# ===========================================
+*.generated.dart
+*.freezed.dart
+*.g.dart

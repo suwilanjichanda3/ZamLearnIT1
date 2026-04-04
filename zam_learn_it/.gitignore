@@ -1,0 +1,123 @@
+# ===========================================
+# Flutter / Dart
+# ===========================================
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+app.*.symbols
+app.*.map.json
+
+# Android
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle/
+/android/local.properties
+
+# iOS
+/ios/.symlinks/
+/ios/Pods/
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
+
+# Windows
+/windows/flutter/ephemeral/
+
+# macOS
+/macos/Flutter/ephemeral/
+
+# ===========================================
+# Python Backend
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ===========================================
+# Database Files (IMPORTANT!)
+# ===========================================
+*.db
+*.sqlite
+*.sqlite3
+translations.db
+history.db
+
+# ===========================================
+# Environment & Secrets
+# ===========================================
+.env
+.env.local
+.env.*.local
+secrets.yaml
+config.yaml
+keys.json
+
+# ===========================================
+# Model Files (Large - don't commit to Git)
+# ===========================================
+*.bin
+*.safetensors
+*.pth
+*.onnx
+models/
+cache/
+model_cache/
+
+# ===========================================
+# IDE & Editor
+# ===========================================
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+.atom/
+.spacemacs
+
+# ===========================================
+# Logs & Temporary Files
+# ===========================================
+*.log
+*.tmp
+*.temp
+*.cache
+logs/
+temp/
+tmp/
+migrate_working_dir/
+.build/
+.buildlog/
+.history
+
+# ===========================================
+# Miscellaneous
+# ===========================================
+*.class
+*.pyc
+.svn/
+.swiftpm/
