@@ -36,6 +36,7 @@ dependencies:
   sqflite: ^2.3.0
   path_provider: ^2.1.2
   provider: ^6.1.2
+  shared_preferences: ^2.2.2
   
   
 
@@ -105,3 +106,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+

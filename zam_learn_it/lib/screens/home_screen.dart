@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'translate_screen.dart';
 import 'history_screen.dart';
+import 'settings_screen.dart'; // Add this import
 import 'dart:io';
 
 class HomeScreen extends StatelessWidget {
@@ -28,27 +29,51 @@ class HomeScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                // TOP BAR / HEADER - White (Smaller for mobile)
+                // TOP BAR / HEADER - White with settings button
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: Colors.white,
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "ZamLearnIT",
-                        style: TextStyle(
-                          fontSize: 28,  // Reduced from 56 to 28 for mobile
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 1,
+                      // Spacer to balance the settings button
+                      const SizedBox(width: 40),
+                      
+                      // Centered title and flag
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              "ZamLearnIT",
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              "🇿🇲",
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(width: 6),
-                      // Zambian flag emoji
-                      Text(
-                        "🇿🇲",
-                        style: TextStyle(fontSize: 24),  // Reduced from 40 to 24
+                      
+                      // Settings button on the right
+                      IconButton(
+                        icon: const Icon(Icons.settings, color: Colors.blue, size: 24),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                        tooltip: 'Settings',
                       ),
                     ],
                   ),
@@ -68,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                         "Welcome to Zambia's Leading Translation App!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.045, // Responsive font size
+                          fontSize: MediaQuery.of(context).size.width * 0.045,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Segoe Script',
                           color: Colors.white,
@@ -100,9 +125,9 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 40),  // Reduced from 50
+                    const SizedBox(height: 40),
 
-                    // Translate Button - Same size
+                    // Translate Button
                     SizedBox(
                       width: 200,
                       height: 50,
@@ -130,7 +155,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 16),  // Reduced from 20
+                    const SizedBox(height: 16),
 
                     // History Button
                     SizedBox(
@@ -160,11 +185,11 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 25),  // Reduced from 30
+                    const SizedBox(height: 25),
 
                     // Exit Button
                     SizedBox(
-                      width: 140,  // Reduced from 175
+                      width: 140,
                       height: 40,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
@@ -207,7 +232,7 @@ class HomeScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                // FOOTER - White (Smaller for mobile)
+                // FOOTER - White
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   color: Colors.white,
@@ -219,33 +244,33 @@ class HomeScreen extends StatelessWidget {
                           const Icon(
                             Icons.email,
                             color: Colors.blue,
-                            size: 14,  // Reduced from 18
+                            size: 14,
                           ),
                           const SizedBox(width: 6),
-                          Flexible(  // Added Flexible to prevent overflow
+                          Flexible(
                             child: Text(
                               "suwichanda@zamlearnit.com",
                               style: const TextStyle(
                                 color: Colors.blue,
-                                fontSize: 10,  // Reduced from 12
+                                fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 12),  // Reduced from 20
+                          const SizedBox(width: 12),
                           const Icon(
                             Icons.phone,
                             color: Colors.blue,
-                            size: 14,  // Reduced from 18
+                            size: 14,
                           ),
                           const SizedBox(width: 6),
-                          Flexible(  // Added Flexible to prevent overflow
+                          Flexible(
                             child: Text(
                               "0770473106 / 0967702012",
                               style: const TextStyle(
                                 color: Colors.blue,
-                                fontSize: 10,  // Reduced from 12
+                                fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -253,12 +278,12 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),  // Reduced from 8
+                      const SizedBox(height: 6),
                       Text(
                         "© 2026 ZamLearnIT - All Rights Reserved",
                         style: TextStyle(
                           color: Colors.blue.withOpacity(0.7),
-                          fontSize: 9,  // Reduced from 10
+                          fontSize: 9,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
