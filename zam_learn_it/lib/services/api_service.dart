@@ -5,7 +5,7 @@ class ApiService {
   // Change this to your backend IP address
   // For Android emulator: 10.0.2.2
   // For physical device: Your computer's IP address (e.g., 192.168.1.100)
-  static const String baseUrl = 'http://192.168.43.52:8000'; 
+  static const String baseUrl = 'https://freddy-nonvisualized-improvably.ngrok-free.dev'; 
   
   // Check if backend is healthy/running
   static Future<bool> checkHealth() async {
