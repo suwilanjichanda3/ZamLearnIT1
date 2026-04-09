@@ -5,7 +5,7 @@ class ApiService {
   // Change this to your backend IP address
   // For Android emulator: 10.0.2.2
   // For physical device: Your computer's IP address (e.g., 192.168.1.100)
-  static const String baseUrl = 'https://freddy-nonvisualized-improvably.ngrok-free.dev'; 
+  static const String baseUrl = 'http://192.168.43.52:8000'; 
   
   // Ngrok bypass header (add to all requests)
   static const Map<String, String> _headers = {
@@ -17,7 +17,7 @@ class ApiService {
   static Future<bool> checkHealth() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/health'),
+        Uri.parse('$baseUrl/health'),
         headers: _headers,  // CHANGED: Use _headers
       ).timeout(const Duration(seconds: 5));
       
