@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+transformers
+torch
+sqlite3
+pydantic
