@@ -3,14 +3,16 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Change this to your backend IP address
+  // For Chrome/Edge testing: localhost or 127.0.0.1
   // For Android emulator: 10.0.2.2
   // For physical device: Your computer's IP address (e.g., 192.168.1.100)
-  static const String baseUrl = 'https://freddy-nonvisualized-improvably.ngrok-free.dev'; 
   
-  // Ngrok bypass header (add to all requests)
+  // IMPORTANT: Use HTTP, not HTTPS (your backend runs on HTTP)
+  static const String baseUrl = 'http://127.0.0.1:8000';
+  
+  // Headers for all requests
   static const Map<String, String> _headers = {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',  // CRITICAL for ngrok free tier
   };
   
   // Check if backend is healthy/running
@@ -18,7 +20,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/health'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
       ).timeout(const Duration(seconds: 5));
       
       return response.statusCode == 200;
@@ -33,7 +35,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/languages'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
       );
       
       if (response.statusCode == 200) {
@@ -52,12 +54,12 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/translate'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
         body: jsonEncode({
           'text': text,
           'target_language': targetLanguage,
         }),
-      ).timeout(const Duration(seconds: 30)); // Translation might take a few seconds
+      ).timeout(const Duration(seconds: 30));
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -81,7 +83,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/history'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
       );
       
       if (response.statusCode == 200) {
@@ -100,7 +102,7 @@ class ApiService {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/history/$id'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
       );
       return response.statusCode == 200;
     } catch (e) {
@@ -114,7 +116,7 @@ class ApiService {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/history/all'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
       );
       return response.statusCode == 200;
     } catch (e) {
@@ -128,7 +130,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/history/$id'),
-        headers: _headers,  // CHANGED: Use _headers
+        headers: _headers,
       );
       
       if (response.statusCode == 200) {
