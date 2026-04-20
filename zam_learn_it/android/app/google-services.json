@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "495770030559",
+    "project_id": "zam-learn-it",
+    "storage_bucket": "zam-learn-it.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495770030559:android:31cb9364e22cf58b7e746a",
+        "android_client_info": {
+          "package_name": "com.example.zam_learn_it"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChrMdoCi54ZAcJpMoHbsbNogrRzP9l2_g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
