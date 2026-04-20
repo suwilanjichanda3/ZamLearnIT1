@@ -2,95 +2,71 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Change this to your backend IP address
-  // For Chrome/Edge testing: localhost or 127.0.0.1
-  // For Android emulator: 10.0.2.2
-  // For physical device: Your computer's IP address (e.g., 192.168.1.100)
+  // Update this with your actual backend URL
+  static const String baseUrl = 'http://localhost:8000'; // For Android emulator
 
-  
-  // IMPORTANT: Use HTTP, not HTTPS (your backend runs on HTTP)
-  static const String baseUrl = 'http://127.0.0.1:8000';
-  
-  // Headers for all requests
-  static const Map<String, String> _headers = {
-    'Content-Type': 'application/json',
-  };
-  
-  // Check if backend is healthy/running
+  // Check if server is healthy
   static Future<bool> checkHealth() async {
     try {
       final response = await http.get(
-<<<<<<< HEAD
-        Uri.parse('$baseUrl/health'),
-        headers: _headers,  // CHANGED: Use _headers
-=======
         Uri.parse('$baseUrl/health'),
-        headers: _headers,
->>>>>>> 7294a65 (Fix: Add Clipboard import to history screen and fix API URL to HTTP)
+        headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
-      
       return response.statusCode == 200;
     } catch (e) {
       print('Health check failed: $e');
       return false;
     }
   }
-  
-  // Get list of supported languages
+
+  // Get available languages
   static Future<List<String>> getLanguages() async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/languages'),
-        headers: _headers,
+        headers: {'Content-Type': 'application/json'},
       );
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return List<String>.from(data['languages']);
       }
-      return ['bemba', 'nyanja']; // Default fallback
+      return ['bemba', 'nyanja'];
     } catch (e) {
       print('Error loading languages: $e');
       return ['bemba', 'nyanja'];
     }
   }
-  
+
   // Translate text
-  static Future<Map<String, dynamic>> translateText(String text, String targetLanguage) async {
+  static Future<Map<String, dynamic>> translateText(String text, String language) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/translate'),
-        headers: _headers,
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'text': text,
-          'target_language': targetLanguage,
+          'target_language': language,
         }),
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
-      } else {
-        return {
-          'success': false,
-          'error': 'Server error: ${response.statusCode}'
-        };
       }
+      return {'success': false, 'error': 'Translation failed'};
     } catch (e) {
       print('Translation error: $e');
-      return {
-        'success': false,
-        'error': 'Connection error: $e'
-      };
+      return {'success': false, 'error': e.toString()};
     }
   }
-  
-  // Get all translation history
+
+  // Get translation history
   static Future<List<Map<String, dynamic>>> getHistory() async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/history'),
-        headers: _headers,
-      );
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 5));
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -102,50 +78,75 @@ class ApiService {
       return [];
     }
   }
-  
-  // Delete a single history item by ID
-  static Future<bool> deleteHistoryItem(int id) async {
+
+  // Submit translation suggestion for training (OPTIONAL - doesn't block if fails)
+  static Future<Map<String, dynamic>> submitTranslationSuggestion({
+    required String originalText,
+    required String currentTranslation,
+    required String suggestedTranslation,
+    required String language,
+    required String note,
+  }) async {
     try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/history/$id'),
-        headers: _headers,
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error deleting history item: $e');
-      return false;
-    }
-  }
-  
-  // Clear all history
-  static Future<bool> clearAllHistory() async {
-    try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/history/all'),
-        headers: _headers,
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error clearing history: $e');
-      return false;
-    }
-  }
-  
-  // Get a single history item by ID
-  static Future<Map<String, dynamic>?> getHistoryItem(int id) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/history/$id'),
-        headers: _headers,
-      );
+      final response = await http.post(
+        Uri.parse('$baseUrl/submit-suggestion'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'original': originalText,
+          'current_translation': currentTranslation,
+          'suggested_translation': suggestedTranslation,
+          'language': language,
+          'note': note,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      ).timeout(const Duration(seconds: 3)); // Short timeout so it doesn't hang
       
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ Suggestion submitted to backend');
         return jsonDecode(response.body);
+      } else {
+        print('⚠️ Backend returned ${response.statusCode}, but continuing...');
+        return {'success': true, 'local_only': true, 'message': 'Saved locally only'};
       }
-      return null;
     } catch (e) {
-      print('Error getting history item: $e');
-      return null;
+      // Don't throw - this is optional. Just log and continue.
+      print('⚠️ Could not reach backend for suggestion: $e');
+      return {'success': true, 'local_only': true, 'message': 'Saved locally only'};
+    }
+  }
+
+  // Save improved translation to user's history (OPTIONAL - doesn't block if fails)
+  static Future<Map<String, dynamic>> saveImprovedTranslation({
+    required String originalText,
+    required String improvedTranslation,
+    required String language,
+    required String originalTranslation,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/save-improved-translation'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'original': originalText,
+          'translated': improvedTranslation,
+          'language': language,
+          'original_translation': originalTranslation,
+          'is_improved': true,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      ).timeout(const Duration(seconds: 3));
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ Improved translation saved to backend');
+        return jsonDecode(response.body);
+      } else {
+        print('⚠️ Backend returned ${response.statusCode}, but continuing...');
+        return {'success': true, 'local_only': true};
+      }
+    } catch (e) {
+      // Don't throw - this is optional. Just log and continue.
+      print('⚠️ Could not reach backend for improved translation: $e');
+      return {'success': true, 'local_only': true};
     }
   }
 }

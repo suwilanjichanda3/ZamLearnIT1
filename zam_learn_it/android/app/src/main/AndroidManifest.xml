@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application
         android:usesCleartextTraffic="true"
         android:label="zam_learn_it"
