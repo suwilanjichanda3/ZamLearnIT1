@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Update this with your actual backend URL
- static const String baseUrl = 'https://freddy-nonvisualized-improvably.ngrok-free.dev;' // For Android emulator
+ static const String baseUrl =  'https://freddy-nonvisualized-improvably.ngrok-free.dev'; // For Android emulator
 
   // Check if server is healthy
   static Future<bool> checkHealth() async {
