@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Update this with your actual backend URL
-  static const String baseUrl = 'http://localhost:8000'; // For Android emulator
+ static const String baseUrl = 'https://freddy-nonvisualized-improvably.ngrok-free.dev;' // For Android emulator
 
   // Check if server is healthy
   static Future<bool> checkHealth() async {
@@ -48,7 +48,7 @@ class ApiService {
           'text': text,
           'target_language': language,
         }),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 20));
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
