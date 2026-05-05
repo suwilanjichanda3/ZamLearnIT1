@@ -1,9 +1,99 @@
 import 'package:flutter/material.dart';
 import 'translate_screen.dart';
+import 'history_page.dart';
 import 'dart:io';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: const [
+            Icon(Icons.help_outline, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('How to Use ZamLearnIT'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHelpStep('1', 'Type or speak', 'Enter English text by typing or using the microphone button'),
+              const Divider(),
+              _buildHelpStep('2', 'Select language', 'Choose Bemba or Nyanja as your target language'),
+              const Divider(),
+              _buildHelpStep('3', 'Translate', 'Tap the Translate button to get your translation'),
+              const Divider(),
+              _buildHelpStep('4', 'Save & History', 'Translations are automatically saved. View them in History'),
+              const Divider(),
+              _buildHelpStep('5', 'Voice Input', 'Tap the microphone icon to speak instead of typing'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpStep(String number, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Center(
+              child: Text(
+                number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +121,9 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: Colors.white,
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       Text(
                         "ZamLearnIT",
                         style: TextStyle(
@@ -51,10 +141,11 @@ class HomeScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                // CENTER CONTENT
+                // CENTER CONTENT - BUTTONS
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Welcome Text
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
@@ -93,19 +184,19 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 50),
 
-                    // Translate Button
+                    // TRANSLATE BUTTON (Main action - largest)
                     SizedBox(
-                      width: 200,
-                      height: 50,
+                      width: 220,
+                      height: 55,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2196F3),
                           foregroundColor: Colors.white,
                           elevation: 8,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                            borderRadius: BorderRadius.circular(28),
                           ),
                         ),
                         onPressed: () {
@@ -123,24 +214,73 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
+                    const SizedBox(height: 20),
+
+                    // HISTORY BUTTON
+                    SizedBox(
+                      width: 200,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          elevation: 6,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HistoryPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "History",
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 16),
 
-                    // History Button - REMOVED since history is inside TranslateScreen
-                    // (The history icon is in the AppBar of TranslateScreen)
-
-                    const SizedBox(height: 25),
-
-                    // Exit Button
+                    // HELP BUTTON
                     SizedBox(
-                      width: 140,
-                      height: 40,
+                      width: 180,
+                      height: 45,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.9),
+                          foregroundColor: Colors.blue,
+                          side: BorderSide.none,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                        onPressed: () => _showHelpDialog(context),
+                        icon: const Icon(Icons.help_outline, size: 18),
+                        label: const Text(
+                          "Help",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // EXIT BUTTON (Smaller, subtle)
+                    SizedBox(
+                      width: 120,
+                      height: 38,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.red.withOpacity(0.9),
+                          backgroundColor: Colors.red.withOpacity(0.85),
                           foregroundColor: Colors.white,
                           side: BorderSide.none,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                            borderRadius: BorderRadius.circular(19),
                           ),
                         ),
                         onPressed: () {
@@ -166,7 +306,7 @@ class HomeScreen extends StatelessWidget {
                         },
                         child: const Text(
                           "Exit",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

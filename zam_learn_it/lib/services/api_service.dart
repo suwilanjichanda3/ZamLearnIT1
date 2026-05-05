@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Update this with your actual backend URL
- static const String baseUrl =  'http://192.168.43.52:8000'; // For Android emulator
+ static const String baseUrl =  'http://localhost:8000'; // For Android emulator
 
   // Check if server is healthy
   static Future<bool> checkHealth() async {
@@ -99,7 +99,7 @@ class ApiService {
           'note': note,
           'timestamp': DateTime.now().toIso8601String(),
         }),
-      ).timeout(const Duration(seconds: 3)); // Short timeout so it doesn't hang
+      ).timeout(const Duration(seconds: 60)); // Short timeout so it doesn't hang
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('✅ Suggestion submitted to backend');
