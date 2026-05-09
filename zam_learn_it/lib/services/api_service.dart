@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Update this with your actual backend URL
- static const String baseUrl =  'http://192.168.43.52:8000'; // For Android emulator
+ static const String baseUrl =  'https://Suwilanji7000-zamlearnit-backend-api2.hf.space'; // For Android emulator
 
   // Check if server is healthy
   static Future<bool> checkHealth() async {
