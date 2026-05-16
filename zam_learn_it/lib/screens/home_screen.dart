@@ -3,34 +3,170 @@ import 'translate_screen.dart';
 import 'history_page.dart';
 import 'dart:io';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Settings state
+  bool _isDarkMode = false;
+  double _brightness = 0.4; // 0.0 = darker, 1.0 = lighter
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.settings, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Settings'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Dark Mode Toggle
+                const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.light_mode, size: 20, color: Colors.amber),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Switch(
+                        value: _isDarkMode,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            _isDarkMode = value;
+                          });
+                          setState(() {
+                            _isDarkMode = value;
+                          });
+                        },
+                        activeColor: Colors.blue,
+                      ),
+                    ),
+                    const Icon(Icons.dark_mode, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                
+                // Brightness Control
+                const Text(
+                  'Screen Brightness',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.brightness_low, size: 20),
+                    Expanded(
+                      child: Slider(
+                        value: _brightness,
+                        min: 0.2,
+                        max: 0.8,
+                        divisions: 10,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            _brightness = value;
+                          });
+                          setState(() {
+                            _brightness = value;
+                          });
+                        },
+                        activeColor: Colors.blue,
+                      ),
+                    ),
+                    const Icon(Icons.brightness_high, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Brightness: ${((_brightness - 0.2) / 0.6 * 100).toInt()}%',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Preview Section
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _isDarkMode ? Colors.grey[800] : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Preview',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: _isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Sample Text',
+                        style: TextStyle(
+                          color: _isDarkMode ? Colors.white70 : Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showHelpDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.help_outline, color: Colors.blue),
             SizedBox(width: 8),
             Text('How to Use ZamLearnIT'),
           ],
         ),
-        content: SingleChildScrollView(
+        content: const SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHelpStep('1', 'Type or speak', 'Enter English text by typing or using the microphone button'),
-              const Divider(),
-              _buildHelpStep('2', 'Select language', 'Choose Bemba or Nyanja as your target language'),
-              const Divider(),
-              _buildHelpStep('3', 'Translate', 'Tap the Translate button to get your translation'),
-              const Divider(),
-              _buildHelpStep('4', 'Save & History', 'Translations are automatically saved. View them in History'),
-              const Divider(),
-              _buildHelpStep('5', 'Voice Input', 'Tap the microphone icon to speak instead of typing'),
+              Text('• Type English text in the input field'),
+              SizedBox(height: 8),
+              Text('• Select Bemba or Nyanja as target language'),
+              SizedBox(height: 8),
+              Text('• Tap Translate to get your translation'),
+              SizedBox(height: 8),
+              Text('• View all translations in History'),
+              SizedBox(height: 8),
+              Text('• Suggest better translations to help others'),
             ],
           ),
         ),
@@ -44,59 +180,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHelpStep(String number, String title, String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Apply brightness overlay based on settings
+    final overlayColor = _isDarkMode 
+        ? Colors.black.withValues(alpha: _brightness + 0.3)
+        : Colors.black.withValues(alpha: _brightness);
+    
+    // Text color based on mode
+    final textColor = _isDarkMode ? Colors.white : Colors.white;
+    final subtitleColor = _isDarkMode ? Colors.white70 : Colors.white70;
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -108,216 +202,243 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // DARK OVERLAY
+          // DYNAMIC OVERLAY - Changes with brightness and dark mode
           Container(
-            color: Colors.black.withOpacity(0.4),
+            color: overlayColor,
           ),
 
           // MAIN CONTENT
           SafeArea(
             child: Column(
               children: [
-                // TOP BAR
+                // TOP BAR - WHITE with Settings button and Zambian flag
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   color: Colors.white,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        "ZamLearnIT",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 1,
-                        ),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 40),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            "ZamLearnIT",
+                            style: TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            "🇿🇲",
+                            style: TextStyle(fontSize: 24),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 6),
-                      Text("🇿🇲", style: TextStyle(fontSize: 24)),
+                      IconButton(
+                        icon: const Icon(Icons.settings, color: Colors.blue, size: 36),
+                        onPressed: () => _showSettingsDialog(context),
+                      ),
                     ],
                   ),
                 ),
 
-                const Spacer(),
+                const Spacer(flex: 1),
 
-                // CENTER CONTENT - BUTTONS
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Welcome Text
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        "Welcome to Zambia's Leading Translation App!",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.045,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Segoe Script',
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(
-                              blurRadius: 10,
-                              color: Colors.black54,
-                              offset: Offset(3, 3),
-                            ),
-                          ],
-                        ),
-                      ),
+                // TAGLINE
+                Center(
+                  child: Text(
+                    "Translate...... Learn...... Grow.....",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: subtitleColor,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1,
                     ),
-
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Learn...... Translate...... Grow.",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 4,
-                            color: Colors.black38,
-                            offset: Offset(1, 1),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 50),
-
-                    // TRANSLATE BUTTON (Main action - largest)
-                    SizedBox(
-                      width: 220,
-                      height: 55,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2196F3),
-                          foregroundColor: Colors.white,
-                          elevation: 8,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const TranslateScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "Translate",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // HISTORY BUTTON
-                    SizedBox(
-                      width: 200,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HistoryPage(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "History",
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // HELP BUTTON
-                    SizedBox(
-                      width: 180,
-                      height: 45,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.9),
-                          foregroundColor: Colors.blue,
-                          side: BorderSide.none,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                        ),
-                        onPressed: () => _showHelpDialog(context),
-                        icon: const Icon(Icons.help_outline, size: 18),
-                        label: const Text(
-                          "Help",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // EXIT BUTTON (Smaller, subtle)
-                    SizedBox(
-                      width: 120,
-                      height: 38,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.red.withOpacity(0.85),
-                          foregroundColor: Colors.white,
-                          side: BorderSide.none,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(19),
-                          ),
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Exit App"),
-                                content: const Text("Are you sure you want to exit?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => exit(0),
-                                    child: const Text("Exit", style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: const Text(
-                          "Exit",
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
 
-                const Spacer(),
+                const SizedBox(height: 30),
+
+                // WELCOME TEXT
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    "Welcome to Zambia's Leading Translation App!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 8,
+                          color: Colors.black45,
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+
+                // TRANSLATE BUTTON
+                Center(
+                  child: SizedBox(
+                    width: 170,
+                    height: 46,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2196F3),
+                        foregroundColor: Colors.white,
+                        elevation: 6,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TranslateScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Translate",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // HISTORY BUTTON
+                Center(
+                  child: SizedBox(
+                    width: 170,
+                    height: 46,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4CAF50),
+                        foregroundColor: Colors.white,
+                        elevation: 6,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const HistoryPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "History",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // HELP BUTTON - WHITE with question mark
+                Center(
+                  child: SizedBox(
+                    width: 170,
+                    height: 46,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF2196F3),
+                        elevation: 6,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: () => _showHelpDialog(context),
+                      icon: const Icon(Icons.question_mark, size: 18),
+                      label: const Text(
+                        "Help",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // EXIT BUTTON
+                Center(
+                  child: SizedBox(
+                    width: 108,
+                    height: 36,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.red.withValues(alpha: 0.85),
+                        foregroundColor: Colors.white,
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Exit App"),
+                              content: const Text("Are you sure you want to exit?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () => exit(0),
+                                  child: const Text("Exit", style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text(
+                        "Exit",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const Spacer(flex: 2),
 
                 // FOOTER
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   color: Colors.white,
                   child: Column(
                     children: [
@@ -331,13 +452,13 @@ class HomeScreen extends StatelessWidget {
                               "suwichanda@zamlearnit.com",
                               style: const TextStyle(
                                 color: Colors.blue,
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           const Icon(Icons.phone, color: Colors.blue, size: 14),
                           const SizedBox(width: 6),
                           Flexible(
@@ -345,7 +466,7 @@ class HomeScreen extends StatelessWidget {
                               "0770473106 / 0967702012",
                               style: const TextStyle(
                                 color: Colors.blue,
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -357,8 +478,8 @@ class HomeScreen extends StatelessWidget {
                       Text(
                         "© 2026 ZamLearnIT - All Rights Reserved",
                         style: TextStyle(
-                          color: Colors.blue.withOpacity(0.7),
-                          fontSize: 9,
+                          color: Colors.blue.withValues(alpha: 0.7),
+                          fontSize: 10,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
