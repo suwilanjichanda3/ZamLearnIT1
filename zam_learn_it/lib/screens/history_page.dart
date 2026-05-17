@@ -458,7 +458,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           child: const Text(
                             "History",
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
