@@ -4,7 +4,6 @@ import 'translate_screen.dart';
 import '../services/firestore_service.dart';
 
 class HistoryPage extends StatefulWidget {
-
   const HistoryPage({super.key});
 
   @override
@@ -24,9 +23,10 @@ class _HistoryPageState extends State<HistoryPage> {
   // Settings state
   bool _isDarkMode = false;
   double _brightness = 0.4;
+  double _fontSize = 14.0;
 
-  final Color _lightGreen = const Color(0xFF81C784);  // Light Green
-  final Color _darkGreen = const Color(0xFF388E3C);   // Dark Green for accents
+  final Color _lightGreen = const Color(0xFF81C784);
+  final Color _darkGreen = const Color(0xFF388E3C);
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             _isDarkMode = value;
                           });
                         },
-                        activeThumbColor: Colors.green,
+                        activeColor: Colors.green,
                       ),
                     ),
                     const Icon(Icons.dark_mode, size: 20),
@@ -120,6 +120,42 @@ class _HistoryPageState extends State<HistoryPage> {
                 Center(
                   child: Text(
                     'Brightness: ${((_brightness - 0.2) / 0.6 * 100).toInt()}%',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Font Size',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.text_fields, size: 20),
+                    Expanded(
+                      child: Slider(
+                        value: _fontSize,
+                        min: 12.0,
+                        max: 22.0,
+                        divisions: 10,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            _fontSize = value;
+                          });
+                          setState(() {
+                            _fontSize = value;
+                          });
+                        },
+                        activeColor: Colors.green,
+                      ),
+                    ),
+                    const Icon(Icons.format_size, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Text size: ${_fontSize.toStringAsFixed(0)}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ),
@@ -224,10 +260,14 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void _showLearnedTranslations() {
+    final modalCardColor = _isDarkMode ? Colors.grey[850]! : Colors.white;
+    final modalTextColor = _isDarkMode ? Colors.white : Colors.black87;
+    final modalLabelFontSize = (_fontSize * 0.9).clamp(11.0, 18.0);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -240,168 +280,180 @@ class _HistoryPageState extends State<HistoryPage> {
               maxChildSize: 0.95,
               expand: false,
               builder: (context, scrollController) {
-                return Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.teal,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Community Translations',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh, color: Colors.white),
-                            onPressed: () async {
-                              setModalState(() => _isLoadingLearned = true);
-                              await _loadLearnedTranslations();
-                              setModalState(() => _isLoadingLearned = false);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: _isLoadingLearned
-                          ? const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text('Loading community translations...'),
-                                ],
-                              ),
-                            )
-                          : _learnedTranslations.isEmpty
-                              ? const Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.auto_awesome, size: 48, color: Colors.grey),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        'No community translations yet',
-                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        'Suggest improvements to help the community!',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : ListView.builder(
-                                  controller: scrollController,
-                                  itemCount: _learnedTranslations.length,
-                                  itemBuilder: (context, index) {
-                                    final item = _learnedTranslations[index];
-                                    return Card(
-                                      margin: const EdgeInsets.all(8),
-                                      elevation: 2,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: ListTile(
-                                        leading: CircleAvatar(
-                                          backgroundColor: Colors.teal.withValues(alpha: 0.2),
-                                          child: const Icon(
-                                            Icons.group,
-                                            color: Colors.teal,
-                                            size: 20,
-                                          ),
-                                        ),
-                                        title: Text(
-                                          item['original'] ?? 'Unknown',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              item['suggested'] ?? '',
-                                              style: const TextStyle(fontSize: 13, color: Colors.teal),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Wrap(
-                                              spacing: 8,
-                                              runSpacing: 4,
-                                              children: [
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.teal.withValues(alpha: 0.1),
-                                                    borderRadius: BorderRadius.circular(8),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      const Icon(Icons.trending_up, size: 10, color: Colors.teal),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        'Confidence: ${item['confidence'] ?? 0}',
-                                                        style: const TextStyle(fontSize: 10, color: Colors.teal),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.blue.withValues(alpha: 0.1),
-                                                    borderRadius: BorderRadius.circular(8),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      const Icon(Icons.repeat, size: 10, color: Colors.blue),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        'Used: ${item['times_suggested'] ?? 0} times',
-                                                        style: const TextStyle(fontSize: 10, color: Colors.blue),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        trailing: IconButton(
-                                          icon: const Icon(Icons.copy, size: 18, color: Colors.teal),
-                                          onPressed: () {
-                                            Clipboard.setData(ClipboardData(text: item['suggested'] ?? ''));
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Copied community translation!'),
-                                                duration: Duration(seconds: 1),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    );
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Community Translations',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.refresh, color: Colors.white),
+                                  onPressed: () async {
+                                    setModalState(() => _isLoadingLearned = true);
+                                    await _loadLearnedTranslations();
+                                    setModalState(() => _isLoadingLearned = false);
                                   },
                                 ),
-                    ),
-                  ],
+                                IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.white),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: _isLoadingLearned
+                            ? const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text('Loading community translations...'),
+                                  ],
+                                ),
+                              )
+                            : _learnedTranslations.isEmpty
+                                ? const Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.auto_awesome, size: 48, color: Colors.grey),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          'No community translations yet',
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          'Suggest improvements to help the community!',
+                                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    controller: scrollController,
+                                    itemCount: _learnedTranslations.length,
+                                    itemBuilder: (context, index) {
+                                      final item = _learnedTranslations[index];
+                                      return Card(
+                                        color: modalCardColor,
+                                        margin: const EdgeInsets.all(8),
+                                        elevation: 2,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: ListTile(
+                                          leading: CircleAvatar(
+                                            backgroundColor: Colors.teal.withValues(alpha: 0.2),
+                                            child: const Icon(
+                                              Icons.group,
+                                              color: Colors.teal,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          title: Text(
+                                            item['original'] ?? 'Unknown',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: _fontSize,
+                                              color: modalTextColor,
+                                            ),
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                item['suggested'] ?? '',
+                                                style: TextStyle(fontSize: _fontSize, color: Colors.teal),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Wrap(
+                                                spacing: 8,
+                                                runSpacing: 4,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.teal.withValues(alpha: 0.1),
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        const Icon(Icons.trending_up, size: 10, color: Colors.teal),
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          'Confidence: ${item['confidence'] ?? 0}',
+                                                          style: TextStyle(fontSize: modalLabelFontSize * 0.9, color: Colors.teal),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.blue.withValues(alpha: 0.1),
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        const Icon(Icons.repeat, size: 10, color: Colors.blue),
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          'Used: ${item['times_suggested'] ?? 0} times',
+                                                          style: TextStyle(fontSize: modalLabelFontSize * 0.9, color: Colors.blue),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          trailing: IconButton(
+                                            icon: const Icon(Icons.copy, size: 18, color: Colors.teal),
+                                            onPressed: () {
+                                              Clipboard.setData(ClipboardData(text: item['suggested'] ?? ''));
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Copied community translation!'),
+                                                  duration: Duration(seconds: 1),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                      ),
+                    ],
+                  ),
                 );
               },
             );
@@ -423,176 +475,181 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Keep history page background white (no grey/black tint overlay).
-    final overlayColor = Colors.transparent;
-
+    final brightnessFactor = ((_brightness - 0.2) / 0.6).clamp(0.0, 1.0);
+    final backgroundColor = _isDarkMode
+        ? Color.lerp(Colors.black, Colors.grey[850]!, brightnessFactor)!
+        : Color.lerp(Colors.white, Colors.grey[100]!, brightnessFactor)!;
+    final surfaceColor = _isDarkMode ? Colors.grey[900]! : Colors.grey.shade50;
+    final cardColor = _isDarkMode ? Colors.grey[850]! : Colors.white;
+    final textColor = _isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = _isDarkMode ? Colors.grey[300]! : Colors.grey.shade700;
+    final labelFontSize = (_fontSize * 0.9).clamp(11.0, 18.0);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Container(color: overlayColor),
-          SafeArea(
-            child: Column(
-              children: [
-                // TOP BAR with Settings - Light Green background, centered title
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  color: _lightGreen,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // TOP BAR with title ABOVE buttons
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: _lightGreen,
+              child: Column(
+                children: [
+                  // Title row with back button
+                  Row(
                     children: [
-                      // Back to Translate
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => const TranslateScreen()),
                           );
                         },
                       ),
-                      Expanded(
+                      const Expanded(
                         child: Center(
-
-                          child: const Text(
+                          child: Text(
                             "History",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                         ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Community Button
-                          GestureDetector(
-                            onTap: _showLearnedTranslations,
-                            child: const Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.group,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Community',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Delete All Button
-                          if (_history.isNotEmpty)
-                            GestureDetector(
-                              onTap: _isDeleting ? null : _clearAllHistory,
-                              child: const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.delete_sweep,
-                                    color: Colors.white,
-                                    size: 22,
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Delete All',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          const SizedBox(width: 12),
-                          // Refresh Button
-                          GestureDetector(
-                            onTap: _isLoading ? null : _loadHistory,
-                            child: const Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.refresh,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Refresh',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Settings Button
-                          IconButton(
-                            icon: const Icon(Icons.settings, color: Colors.white, size: 24),
-                            onPressed: () => _showSettingsDialog(context),
-                          ),
-                        ],
+                      IconButton(
+                        icon: const Icon(Icons.home, color: Colors.white, size: 24),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TranslateScreen()),
+                          );
+                        },
                       ),
                     ],
                   ),
-                ),
-                
-                // SEARCH BAR
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search translations...',
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, color: Colors.grey),
-                              onPressed: () {
-                                _searchController.clear();
-                                _filterHistory();
-                              },
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
+                  const SizedBox(height: 12),
+                  // Action buttons row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: _showLearnedTranslations,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.group, color: Colors.white, size: 22),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Community',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: labelFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
+                      const SizedBox(width: 16),
+                      if (_history.isNotEmpty)
+                        GestureDetector(
+                          onTap: _isDeleting ? null : _clearAllHistory,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.delete_sweep, color: Colors.white, size: 22),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Delete All',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: labelFontSize,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(width: 16),
+                      GestureDetector(
+                        onTap: _isLoading ? null : _loadHistory,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.refresh, color: Colors.white, size: 22),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Refresh',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: labelFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        icon: const Icon(Icons.settings, color: Colors.white, size: 24),
+                        onPressed: () => _showSettingsDialog(context),
+                      ),
+                    ],
                   ),
-                ),
-                
-                // MAIN CONTENT
-                Expanded(
-                  child: _buildBody(),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            
+            // SEARCH BAR
+            Container(
+              margin: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _searchController,
+                style: TextStyle(fontSize: _fontSize, color: textColor),
+                decoration: InputDecoration(
+                  hintText: 'Search translations...',
+                  hintStyle: TextStyle(color: secondaryTextColor),
+                  prefixIcon: Icon(Icons.search, color: secondaryTextColor),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: secondaryTextColor),
+                          onPressed: () {
+                            _searchController.clear();
+                            _filterHistory();
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: surfaceColor,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                ),
+              ),
+            ),
+            
+            // MAIN CONTENT
+            Expanded(
+              child: _buildBody(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBody() {
+    final textColor = _isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = _isDarkMode ? Colors.grey[300]! : Colors.grey.shade700;
+    final cardColor = _isDarkMode ? Colors.grey[850]! : Colors.white;
+    final fontSize = _fontSize;
+
     if (_isLoading) {
       return const Center(
         child: Column(
@@ -611,11 +668,11 @@ class _HistoryPageState extends State<HistoryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+            Icon(Icons.search_off, size: 64, color: secondaryTextColor),
             const SizedBox(height: 16),
             Text(
               'No results for "${_searchController.text}"',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: TextStyle(fontSize: fontSize, color: secondaryTextColor),
             ),
             const SizedBox(height: 8),
             TextButton(
@@ -644,7 +701,7 @@ class _HistoryPageState extends State<HistoryPage> {
             const SizedBox(height: 8),
             Text(
               'Translate some words to see them here',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: TextStyle(fontSize: fontSize, color: secondaryTextColor),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -671,6 +728,7 @@ class _HistoryPageState extends State<HistoryPage> {
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.85,
             child: Card(
+              color: cardColor,
               margin: const EdgeInsets.only(bottom: 16),
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -692,7 +750,6 @@ class _HistoryPageState extends State<HistoryPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ORIGINAL TEXT SECTION
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -712,7 +769,10 @@ class _HistoryPageState extends State<HistoryPage> {
                                 ),
                                 child: Text(
                                   'ORIGINAL',
-                                  style: TextStyle(fontSize: 12, color: isLearned ? Colors.teal : _darkGreen),
+                                  style: TextStyle(
+                                    fontSize: fontSize * 0.85,
+                                    color: isLearned ? Colors.teal : _darkGreen,
+                                  ),
                                 ),
                               ),
                             ],
@@ -720,13 +780,11 @@ class _HistoryPageState extends State<HistoryPage> {
                           const SizedBox(height: 8),
                           Text(
                             item['original'] ?? 'Unknown',
-                            style: const TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: fontSize, color: textColor),
                           ),
                         ],
                       ),
                     ),
-                    
-                    // TRANSLATED TEXT SECTION
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -747,7 +805,10 @@ class _HistoryPageState extends State<HistoryPage> {
                                 ),
                                 child: Text(
                                   'TRANSLATION (${item['language']?.toUpperCase() ?? 'UNKNOWN'})',
-                                  style: TextStyle(fontSize: 12, color: isLearned ? Colors.teal : _darkGreen),
+                                  style: TextStyle(
+                                    fontSize: fontSize * 0.85,
+                                    color: isLearned ? Colors.teal : _darkGreen,
+                                  ),
                                 ),
                               ),
                               IconButton(
@@ -767,19 +828,19 @@ class _HistoryPageState extends State<HistoryPage> {
                           Text(
                             item['translated'] ?? '',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: fontSize,
                               fontWeight: isLearned ? FontWeight.w600 : FontWeight.w500,
-                              color: isLearned ? Colors.teal.shade800 : Colors.black87,
+                              color: isLearned ? Colors.teal.shade800 : textColor,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
+                              Icon(Icons.access_time, size: 12, color: secondaryTextColor),
                               const SizedBox(width: 4),
                               Text(
                                 _formatDate(item['timestamp']),
-                                style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                                style: TextStyle(fontSize: fontSize * 0.75, color: secondaryTextColor),
                               ),
                               if (isLearned) ...[
                                 const SizedBox(width: 12),
