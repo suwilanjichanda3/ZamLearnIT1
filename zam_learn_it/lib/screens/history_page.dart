@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'translate_screen.dart';
 import '../services/firestore_service.dart';
 
 class HistoryPage extends StatefulWidget {
+
   const HistoryPage({super.key});
 
   @override
@@ -18,22 +20,121 @@ class _HistoryPageState extends State<HistoryPage> {
   bool _isLoading = true;
   bool _isDeleting = false;
   bool _isLoadingLearned = false;
-  bool _isSearching = false;
 
-  final Color _lightBlue = const Color(0xFF87CEEB);
-  final Color _darkBlue = const Color(0xFF2196F3);
+  // Settings state
+  bool _isDarkMode = false;
+  double _brightness = 0.4;
+
+  final Color _lightGreen = const Color(0xFF81C784);  // Light Green
+  final Color _darkGreen = const Color(0xFF388E3C);   // Dark Green for accents
 
   @override
   void initState() {
     super.initState();
     _loadHistory();
     _loadLearnedTranslations();
+    _searchController.addListener(_filterHistory);
   }
 
   @override
   void dispose() {
+    _searchController.removeListener(_filterHistory);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.settings, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Settings'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.light_mode, size: 20, color: Colors.amber),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Switch(
+                        value: _isDarkMode,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            _isDarkMode = value;
+                          });
+                          setState(() {
+                            _isDarkMode = value;
+                          });
+                        },
+                        activeThumbColor: Colors.green,
+                      ),
+                    ),
+                    const Icon(Icons.dark_mode, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                
+                const Text(
+                  'Screen Brightness',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.brightness_low, size: 20),
+                    Expanded(
+                      child: Slider(
+                        value: _brightness,
+                        min: 0.2,
+                        max: 0.8,
+                        divisions: 10,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            _brightness = value;
+                          });
+                          setState(() {
+                            _brightness = value;
+                          });
+                        },
+                        activeColor: Colors.green,
+                      ),
+                    ),
+                    const Icon(Icons.brightness_high, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Brightness: ${((_brightness - 0.2) / 0.6 * 100).toInt()}%',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _loadHistory() async {
@@ -43,8 +144,6 @@ class _HistoryPageState extends State<HistoryPage> {
       setState(() {
         _history = history;
         _filteredHistory = history;
-        _isSearching = false;
-        _searchController.clear();
         _isLoading = false;
       });
     } catch (e) {
@@ -53,31 +152,18 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 
-  void _runFilter(String query) {
-    setState(() {
-      if (query.isEmpty) {
+  void _filterHistory() {
+    final query = _searchController.text;
+    if (query.isEmpty) {
+      setState(() {
         _filteredHistory = _history;
-      } else {
+      });
+    } else {
+      setState(() {
         _filteredHistory = _history.where((item) =>
             (item['original']?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
             (item['translated']?.toLowerCase().contains(query.toLowerCase()) ?? false)).toList();
-      }
-    });
-  }
-
-  Future<void> _loadLearnedTranslations() async {
-    setState(() => _isLoadingLearned = true);
-    try {
-      // Get global suggestions from ALL users
-      final suggestions = await _firestoreService.getGlobalSuggestions();
-      print('📚 Loaded ${suggestions.length} community suggestions');
-      setState(() {
-        _learnedTranslations = suggestions;
-        _isLoadingLearned = false;
       });
-    } catch (e) {
-      print('Error loading learned translations: $e');
-      setState(() => _isLoadingLearned = false);
     }
   }
 
@@ -90,6 +176,20 @@ class _HistoryPageState extends State<HistoryPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Translation deleted'), duration: Duration(seconds: 1)),
     );
+  }
+
+  Future<void> _loadLearnedTranslations() async {
+    setState(() => _isLoadingLearned = true);
+    try {
+      final suggestions = await _firestoreService.getGlobalSuggestions();
+      setState(() {
+        _learnedTranslations = suggestions;
+        _isLoadingLearned = false;
+      });
+    } catch (e) {
+      print('Error loading learned translations: $e');
+      setState(() => _isLoadingLearned = false);
+    }
   }
 
   Future<void> _clearAllHistory() async {
@@ -195,7 +295,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                       ),
                                       SizedBox(height: 8),
                                       Text(
-                                        'When you suggest improvements, they appear here!\nTap "Suggest a Better Translation" on the translate screen.',
+                                        'Suggest improvements to help the community!',
                                         style: TextStyle(fontSize: 12, color: Colors.grey),
                                         textAlign: TextAlign.center,
                                       ),
@@ -237,7 +337,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                             const SizedBox(height: 4),
                                             Text(
                                               item['suggested'] ?? '',
-                                              style: const TextStyle(fontSize: 14, color: Colors.teal),
+                                              style: const TextStyle(fontSize: 13, color: Colors.teal),
                                             ),
                                             const SizedBox(height: 4),
                                             Wrap(
@@ -257,7 +357,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                                       const SizedBox(width: 4),
                                                       Text(
                                                         'Confidence: ${item['confidence'] ?? 0}',
-                                                        style: const TextStyle(fontSize: 14, color: Colors.teal),
+                                                        style: const TextStyle(fontSize: 10, color: Colors.teal),
                                                       ),
                                                     ],
                                                   ),
@@ -275,7 +375,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                                       const SizedBox(width: 4),
                                                       Text(
                                                         'Used: ${item['times_suggested'] ?? 0} times',
-                                                        style: const TextStyle(fontSize: 14, color: Colors.blue),
+                                                        style: const TextStyle(fontSize: 10, color: Colors.blue),
                                                       ),
                                                     ],
                                                   ),
@@ -296,48 +396,6 @@ class _HistoryPageState extends State<HistoryPage> {
                                             );
                                           },
                                         ),
-                                        onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: const Text('Community Translation'),
-                                              content: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Original: ${item['original']}',
-                                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Text('Suggested: ${item['suggested']}'),
-                                                  const SizedBox(height: 8),
-                                                  Text(
-                                                    'Confidence: ${item['confidence']} | Used ${item['times_suggested']} times',
-                                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                                  ),
-                                                ],
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context),
-                                                  child: const Text('Close'),
-                                                ),
-                                                ElevatedButton.icon(
-                                                  onPressed: () {
-                                                    Clipboard.setData(ClipboardData(text: item['suggested'] ?? ''));
-                                                    Navigator.pop(context);
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      const SnackBar(content: Text('Copied!'), duration: Duration(seconds: 1)),
-                                                    );
-                                                  },
-                                                  icon: const Icon(Icons.copy, size: 16),
-                                                  label: const Text('Copy'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
                                       ),
                                     );
                                   },
@@ -365,138 +423,171 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep history page background white (no grey/black tint overlay).
+    final overlayColor = Colors.transparent;
+
+
     return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-                decoration: const InputDecoration(
-                  hintText: 'Search translations...',
-                  hintStyle: TextStyle(color: Colors.white70),
-                  border: InputBorder.none,
-                ),
-                onChanged: _runFilter,
-              )
-            : const Text(
-                'History',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-        backgroundColor: _lightBlue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          // SEARCH TOGGLE BUTTON
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isSearching = !_isSearching;
-                  if (!_isSearching) {
-                    _searchController.clear();
-                    _filteredHistory = _history;
-                  }
-                });
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _isSearching ? Icons.close : Icons.search,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // COMMUNITY BUTTON
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: GestureDetector(
-              onTap: _showLearnedTranslations,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(
-                    Icons.group,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Community',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (_history.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: GestureDetector(
-                onTap: _isDeleting ? null : _clearAllHistory,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.delete_sweep,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      'Delete All',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Container(color: overlayColor),
+          SafeArea(
+            child: Column(
+              children: [
+                // TOP BAR with Settings - Light Green background, centered title
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: _lightGreen,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Back to Translate
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TranslateScreen()),
+                          );
+                        },
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Center(
+
+                          child: const Text(
+                            "History",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Community Button
+                          GestureDetector(
+                            onTap: _showLearnedTranslations,
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.group,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Community',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Delete All Button
+                          if (_history.isNotEmpty)
+                            GestureDetector(
+                              onTap: _isDeleting ? null : _clearAllHistory,
+                              child: const Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.delete_sweep,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    'Delete All',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          const SizedBox(width: 12),
+                          // Refresh Button
+                          GestureDetector(
+                            onTap: _isLoading ? null : _loadHistory,
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Refresh',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Settings Button
+                          IconButton(
+                            icon: const Icon(Icons.settings, color: Colors.white, size: 24),
+                            onPressed: () => _showSettingsDialog(context),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: GestureDetector(
-              onTap: _isLoading ? null : _loadHistory,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.refresh,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Refresh',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
+                
+                // SEARCH BAR
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search translations...',
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Colors.grey),
+                              onPressed: () {
+                                _searchController.clear();
+                                _filterHistory();
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                   ),
-                ],
-              ),
+                ),
+                
+                // MAIN CONTENT
+                Expanded(
+                  child: _buildBody(),
+                ),
+              ],
             ),
           ),
         ],
-      ),
-      body: Container(
-        color: Colors.white,
-        child: Center(
-          child: _buildBody(),
-        ),
       ),
     );
   }
@@ -525,6 +616,14 @@ class _HistoryPageState extends State<HistoryPage> {
             Text(
               'No results for "${_searchController.text}"',
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                _searchController.clear();
+                _filterHistory();
+              },
+              child: const Text('Clear search'),
             ),
           ],
         ),
@@ -608,16 +707,12 @@ class _HistoryPageState extends State<HistoryPage> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: isLearned ? Colors.teal.withValues(alpha: 0.2) : _lightBlue.withValues(alpha: 0.15),
+                                  color: isLearned ? Colors.teal.withValues(alpha: 0.2) : _lightGreen.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'ORIGINAL',
-                                      style: TextStyle(fontSize: 14, color: isLearned ? Colors.teal : _darkBlue),
-                                    ),
-                                  ],
+                                child: Text(
+                                  'ORIGINAL',
+                                  style: TextStyle(fontSize: 12, color: isLearned ? Colors.teal : _darkGreen),
                                 ),
                               ),
                             ],
@@ -650,17 +745,13 @@ class _HistoryPageState extends State<HistoryPage> {
                                   color: isLearned ? Colors.teal.withValues(alpha: 0.3) : Colors.green[100],
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'TRANSLATION (${item['language']?.toUpperCase() ?? 'UNKNOWN'})',
-                                      style: TextStyle(fontSize: 14, color: isLearned ? Colors.teal : Colors.green[800]),
-                                    ),
-                                  ],
+                                child: Text(
+                                  'TRANSLATION (${item['language']?.toUpperCase() ?? 'UNKNOWN'})',
+                                  style: TextStyle(fontSize: 12, color: isLearned ? Colors.teal : _darkGreen),
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.copy, size: 16, color: _darkBlue),
+                                icon: Icon(Icons.copy, size: 16, color: _darkGreen),
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(text: item['translated'] ?? ''));
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -682,33 +773,28 @@ class _HistoryPageState extends State<HistoryPage> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 12, // Horizontal spacing between items
-                            runSpacing: 8, // Vertical spacing between lines
+                          Row(
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min, // Important for Wrap to size correctly
-                                children: [
-                                  Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _formatDate(item['timestamp']),
-                                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                  ),
-                                ],
+                              Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatDate(item['timestamp']),
+                                style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                               ),
-                              if (isLearned)
+                              if (isLearned) ...[
+                                const SizedBox(width: 12),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: Colors.teal.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Text( // Changed from Row to Text as it's a single element
+                                  child: const Text(
                                     'Community',
-                                    style: TextStyle(fontSize: 14, color: Colors.teal),
+                                    style: TextStyle(fontSize: 9, color: Colors.teal),
                                   ),
                                 ),
+                              ],
                             ],
                           ),
                         ],

@@ -6,57 +6,106 @@ class SpeechService {
   bool _isAvailable = false;
   bool _isListening = false;
   String _lastRecognizedText = '';
-
-  bool get isAvailable => _isAvailable;
-  bool get isListening => _isListening;
-  String get lastRecognizedText => _lastRecognizedText;
-
-  /// Initializes speech recognition and requests microphone permissions.
+  
+  // Initialize speech recognition
   Future<bool> initialize() async {
-    if (_isAvailable) return true;
-
     final status = await Permission.microphone.request();
     if (!status.isGranted) {
       print('❌ Microphone permission denied');
       return false;
     }
-
-    try {
-      _isAvailable = await _speech.initialize(
-        onStatus: (status) {
-          print('Speech Status: $status');
-          _isListening = (status == 'listening');
-        },
-        onError: (error) {
-          print('Speech Error: $error');
+    
+    _isAvailable = await _speech.initialize(
+      onStatus: (status) {
+        print('Speech status: $status');
+        if (status == 'notListening') {
           _isListening = false;
-        },
-      );
-      return _isAvailable;
-    } catch (e) {
-      print('❌ Speech Init Exception: $e');
-      return false;
+        }
+      },
+      onError: (error) {
+        print('Speech error: $error');
+        _isListening = false;
+      },
+    );
+    
+    print('Speech available: $_isAvailable');
+    return _isAvailable;
+  }
+  
+  bool get isAvailable => _isAvailable;
+  bool get isListening => _isListening;
+  
+  // WhatsApp-style: Record with visual feedback
+  Future<String?> recordAndTranslate({
+    Function(double)? onSoundLevel,
+    Function()? onRecordingStart,
+    Function()? onRecordingStop,
+  }) async {
+    if (!_isAvailable) {
+      await initialize();
     }
+    
+    if (!_isAvailable) {
+      return null;
+    }
+    
+    // Notify recording started
+    if (onRecordingStart != null) onRecordingStart();
+    
+    _isListening = true;
+    String recognizedText = '';
+    
+    // Start listening with sound level monitoring
+    await _speech.listen(
+      onResult: (result) {
+        if (result.recognizedWords.isNotEmpty) {
+          recognizedText = result.recognizedWords;
+        }
+        // Provide sound level for animation (0-100)
+        if (onSoundLevel != null) {
+          // Simulate sound level based on confidence or random for demo
+          final level = (result.confidence ?? 0.5) * 100;
+          onSoundLevel(level);
+        }
+      },
+      listenFor: const Duration(seconds: 10),
+      pauseFor: const Duration(seconds: 2),
+      partialResults: true,
+      onSoundLevelChange: (level) {
+        if (onSoundLevel != null) {
+          onSoundLevel(level * 100);
+        }
+      },
+    );
+    
+    // Wait for user to finish speaking (user releases button)
+    await Future.delayed(const Duration(seconds: 2));
+    await _speech.stop();
+    _isListening = false;
+    
+    // Notify recording stopped
+    if (onRecordingStop != null) onRecordingStop();
+    
+    return recognizedText.isNotEmpty ? recognizedText : null;
   }
-
-  /// Helper to ensure the service is ready before use.
-  Future<bool> _ensureInitialized() async {
-    if (!_isAvailable) return await initialize();
-    return true;
-  }
-
-  /// Starts a continuous listening session (streaming results).
+  
+  // Simple record method (press and hold style)
   Future<void> startListening({
     required Function(String) onResult,
     required Function(String) onError,
+    Function(double)? onSoundLevel,
   }) async {
-    if (!await _ensureInitialized()) {
+    if (!_isAvailable) {
       onError('Speech recognition not available');
       return;
     }
-
-    await stopListening();
-
+    
+    if (_isListening) {
+      await stopListening();
+    }
+    
+    _isListening = true;
+    
     await _speech.listen(
       onResult: (result) {
         if (result.recognizedWords.isNotEmpty) {
@@ -67,43 +116,20 @@ class SpeechService {
       listenFor: const Duration(seconds: 10),
       pauseFor: const Duration(seconds: 2),
       partialResults: true,
-    );
-  }
-
-  /// Captures a single phrase and returns the transcribed text.
-  Future<String?> recordAndTranslate({Duration limit = const Duration(seconds: 8)}) async {
-    if (!await _ensureInitialized()) return null;
-
-    print('🎤 Recording started... Speak now');
-    String recognizedText = '';
-
-    await _speech.listen(
-      onResult: (result) {
-        if (result.recognizedWords.isNotEmpty) {
-          recognizedText = result.recognizedWords;
+      onSoundLevelChange: (level) {
+        if (onSoundLevel != null) {
+          onSoundLevel(level);
         }
       },
-      listenFor: limit,
-      pauseFor: const Duration(seconds: 2),
-      partialResults: false,
     );
-
-    // Wait for the listener to naturally time out or stop it manually
-    await Future.delayed(limit);
-    await _speech.stop();
-
-    return recognizedText.isNotEmpty ? recognizedText : null;
   }
-
+  
   Future<void> stopListening() async {
     if (_isListening) {
       await _speech.stop();
+      _isListening = false;
     }
   }
-
-  Future<void> cancelListening() async {
-    if (_isListening) {
-      await _speech.cancel();
-    }
-  }
+  
+  String get lastRecognizedText => _lastRecognizedText;
 }

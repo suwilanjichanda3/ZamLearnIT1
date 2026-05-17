@@ -225,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             "ZamLearnIT",
                             style: TextStyle(
-                              fontSize: 48,
+                              fontSize: 36,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                               letterSpacing: 1,
@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.settings, color: Colors.blue, size: 36),
+                        icon: const Icon(Icons.settings, color: Colors.blue, size: 20),
                         onPressed: () => _showSettingsDialog(context),
                       ),
                     ],
@@ -251,9 +251,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 // TAGLINE
                 Center(
                   child: Text(
-                    "Translate...... Learn...... Grow.....",
+                    "Translate.... Learn.... Grow....",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       color: subtitleColor,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 1,
@@ -270,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     "Welcome to Zambia's Leading Translation App!",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: textColor,
                       shadows: const [
