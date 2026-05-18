@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'home_screen.dart';
 import 'translate_screen.dart';
 import '../services/firestore_service.dart';
 
@@ -26,7 +27,6 @@ class _HistoryPageState extends State<HistoryPage> {
   double _fontSize = 14.0;
 
   final Color _lightGreen = const Color(0xFF81C784);
-  final Color _darkGreen = const Color(0xFF388E3C);
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             _isDarkMode = value;
                           });
                         },
-                        activeColor: Colors.green,
+                        activeThumbColor: Colors.green,
                       ),
                     ),
                     const Icon(Icons.dark_mode, size: 20),
@@ -479,10 +479,8 @@ class _HistoryPageState extends State<HistoryPage> {
     final backgroundColor = _isDarkMode
         ? Color.lerp(Colors.black, Colors.grey[850]!, brightnessFactor)!
         : Color.lerp(Colors.white, Colors.grey[100]!, brightnessFactor)!;
-    final surfaceColor = _isDarkMode ? Colors.grey[900]! : Colors.grey.shade50;
-    final cardColor = _isDarkMode ? Colors.grey[850]! : Colors.white;
-    final textColor = _isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = _isDarkMode ? Colors.grey[300]! : Colors.grey.shade700;
+    final textColor = Colors.black;
+    final secondaryTextColor = Colors.black;
     final labelFontSize = (_fontSize * 0.9).clamp(11.0, 18.0);
 
     return Scaffold(
@@ -493,14 +491,14 @@ class _HistoryPageState extends State<HistoryPage> {
             // TOP BAR with title ABOVE buttons
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: _lightGreen,
+              color: const Color(0xFF87CEEB),
               child: Column(
                 children: [
                   // Title row with back button
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
@@ -515,19 +513,26 @@ class _HistoryPageState extends State<HistoryPage> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Colors.black,
                             ),
                           ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.home, color: Colors.white, size: 24),
-                        onPressed: () {
+                      GestureDetector(
+                        onTap: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (_) => const TranslateScreen()),
+                            MaterialPageRoute(builder: (_) => const HomeScreen()),
                           );
                         },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.home, color: Colors.black, size: 24),
+                            SizedBox(height: 4),
+                            Text('Home', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -541,12 +546,12 @@ class _HistoryPageState extends State<HistoryPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.group, color: Colors.white, size: 22),
-                            const SizedBox(height: 2),
+                            const Icon(Icons.group, color: Colors.black, size: 22),
+                            const SizedBox(height: 4),
                             Text(
                               'Community',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: labelFontSize,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -561,12 +566,12 @@ class _HistoryPageState extends State<HistoryPage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.delete_sweep, color: Colors.white, size: 22),
-                              const SizedBox(height: 2),
+                              const Icon(Icons.delete_sweep, color: Colors.black, size: 22),
+                              const SizedBox(height: 4),
                               Text(
                                 'Delete All',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontSize: labelFontSize,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -580,12 +585,12 @@ class _HistoryPageState extends State<HistoryPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.refresh, color: Colors.white, size: 22),
-                            const SizedBox(height: 2),
+                            const Icon(Icons.refresh, color: Colors.black, size: 22),
+                            const SizedBox(height: 4),
                             Text(
                               'Refresh',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: labelFontSize,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -594,9 +599,16 @@ class _HistoryPageState extends State<HistoryPage> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      IconButton(
-                        icon: const Icon(Icons.settings, color: Colors.white, size: 24),
-                        onPressed: () => _showSettingsDialog(context),
+                      GestureDetector(
+                        onTap: () => _showSettingsDialog(context),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.settings, color: Colors.black, size: 24),
+                            SizedBox(height: 4),
+                            Text('Settings', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -609,26 +621,32 @@ class _HistoryPageState extends State<HistoryPage> {
               margin: const EdgeInsets.all(16),
               child: TextField(
                 controller: _searchController,
-                style: TextStyle(fontSize: _fontSize, color: textColor),
+                style: TextStyle(fontSize: _fontSize, color: textColor, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
+                  labelText: 'Search translations',
+                  labelStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                   hintText: 'Search translations...',
-                  hintStyle: TextStyle(color: secondaryTextColor),
-                  prefixIcon: Icon(Icons.search, color: secondaryTextColor),
+                  hintStyle: TextStyle(color: secondaryTextColor.withOpacity(0.6), fontWeight: FontWeight.bold),
+                  prefixIcon: Icon(Icons.search, color: textColor),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear, color: secondaryTextColor),
+                          icon: Icon(Icons.clear, color: textColor),
                           onPressed: () {
                             _searchController.clear();
                             _filterHistory();
                           },
                         )
                       : null,
-                  border: OutlineInputBorder(
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Colors.grey.shade500),
                   ),
                   filled: true,
-                  fillColor: surfaceColor,
+                  fillColor: Colors.grey.shade200,
                   contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 ),
               ),
@@ -668,19 +686,19 @@ class _HistoryPageState extends State<HistoryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: secondaryTextColor),
+            const Icon(Icons.search_off, size: 64, color: Colors.black),
             const SizedBox(height: 16),
             Text(
               'No results for "${_searchController.text}"',
-              style: TextStyle(fontSize: fontSize, color: secondaryTextColor),
+              style: TextStyle(fontSize: fontSize, color: Colors.black, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            TextButton(
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
                 _searchController.clear();
                 _filterHistory();
               },
-              child: const Text('Clear search'),
+              child: const Text('Clear search', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black)),
             ),
           ],
         ),
@@ -692,22 +710,22 @@ class _HistoryPageState extends State<HistoryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 64, color: Colors.grey[400]),
+            const Icon(Icons.history, size: 64, color: Colors.black),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'No translations yet',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 8),
             Text(
               'Translate some words to see them here',
-              style: TextStyle(fontSize: fontSize, color: secondaryTextColor),
+              style: TextStyle(fontSize: fontSize, color: Colors.black, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.translate),
-              label: const Text('Go Translate'),
+              label: const Text('Go Translate', style: TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2196F3),
                 foregroundColor: Colors.white,
@@ -771,7 +789,8 @@ class _HistoryPageState extends State<HistoryPage> {
                                   'ORIGINAL',
                                   style: TextStyle(
                                     fontSize: fontSize * 0.85,
-                                    color: isLearned ? Colors.teal : _darkGreen,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -807,30 +826,59 @@ class _HistoryPageState extends State<HistoryPage> {
                                   'TRANSLATION (${item['language']?.toUpperCase() ?? 'UNKNOWN'})',
                                   style: TextStyle(
                                     fontSize: fontSize * 0.85,
-                                    color: isLearned ? Colors.teal : _darkGreen,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
-                              IconButton(
-                                icon: Icon(Icons.copy, size: 16, color: _darkGreen),
-                                onPressed: () {
-                                  Clipboard.setData(ClipboardData(text: item['translated'] ?? ''));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Copied!'), duration: Duration(seconds: 1)),
-                                  );
-                                },
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
+                              Row(
+                                children: [
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.copy, size: 18, color: Colors.black),
+                                        onPressed: () {
+                                          Clipboard.setData(ClipboardData(text: item['translated'] ?? ''));
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Copied!'), duration: Duration(seconds: 1)),
+                                          );
+                                        },
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                      const Text('Copy', style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.share, size: 18, color: Colors.black),
+                                        onPressed: () {
+                                          Clipboard.setData(ClipboardData(text: item['translated'] ?? ''));
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Translation copied for sharing!'), duration: Duration(seconds: 1)),
+                                          );
+                                        },
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                      const Text('Share', style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
                           Text(
                             item['translated'] ?? '',
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: isLearned ? FontWeight.w600 : FontWeight.w500,
-                              color: isLearned ? Colors.teal.shade800 : textColor,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
                           const SizedBox(height: 8),

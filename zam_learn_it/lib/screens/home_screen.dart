@@ -14,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Settings state
   bool _isDarkMode = false;
   double _brightness = 0.4; // 0.0 = darker, 1.0 = lighter
+  int _appRating = 0;
 
   void _showSettingsDialog(BuildContext context) {
     showDialog(
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             _isDarkMode = value;
                           });
                         },
-                        activeColor: Colors.blue,
+                        activeThumbColor: Colors.blue,
                       ),
                     ),
                     const Icon(Icons.dark_mode, size: 20),
@@ -94,6 +95,74 @@ class _HomeScreenState extends State<HomeScreen> {
                 Center(
                   child: Text(
                     'Brightness: ${((_brightness - 0.2) / 0.6 * 100).toInt()}%',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // About Us Section
+                const Text(
+                  'About Us',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _isDarkMode ? Colors.grey[850] : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Contact: 0770473106, 0967702012',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        'Email: suwilanjichanda3@gmail.com',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Rating Section
+                const Text(
+                  'Rate This App',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: List.generate(
+                    5,
+                    (index) => IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      icon: Icon(
+                        Icons.star,
+                        size: 28,
+                        color: index < _appRating ? Colors.amber : Colors.grey,
+                      ),
+                      onPressed: () {
+                        setDialogState(() {
+                          _appRating = index + 1;
+                        });
+                        setState(() {
+                          _appRating = index + 1;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    _appRating > 0
+                        ? 'You rated this app $_appRating of 5'
+                        : 'Tap a star to rate this app',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ),
@@ -225,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             "ZamLearnIT",
                             style: TextStyle(
-                              fontSize: 36,
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                               letterSpacing: 1,
@@ -234,13 +303,27 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(width: 6),
                           Text(
                             "🇿🇲",
-                            style: TextStyle(fontSize: 24),
+                            style: TextStyle(fontSize: 20),
                           ),
                         ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.settings, color: Colors.blue, size: 20),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                        ),
                         onPressed: () => _showSettingsDialog(context),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.settings, size: 20),
+                            SizedBox(height: 2),
+                            Text(
+                              'Settings',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
