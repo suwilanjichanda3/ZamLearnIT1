@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'home_screen.dart';
 import 'translate_screen.dart';
 import '../services/firestore_service.dart';
@@ -26,6 +27,7 @@ class _HistoryPageState extends State<HistoryPage> {
   double _brightness = 0.4;
   double _fontSize = 14.0;
 
+  final Color _lightBlue = const Color(0xFF87CEEB);
   final Color _lightGreen = const Color(0xFF81C784);
 
   @override
@@ -663,7 +665,6 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildBody() {
-    final textColor = _isDarkMode ? Colors.white : Colors.black87;
     final secondaryTextColor = _isDarkMode ? Colors.grey[300]! : Colors.grey.shade700;
     final cardColor = _isDarkMode ? Colors.grey[850]! : Colors.white;
     final fontSize = _fontSize;
@@ -799,7 +800,11 @@ class _HistoryPageState extends State<HistoryPage> {
                           const SizedBox(height: 8),
                           Text(
                             item['original'] ?? 'Unknown',
-                            style: TextStyle(fontSize: fontSize, color: textColor),
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
                         ],
                       ),
@@ -807,7 +812,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isLearned ? Colors.teal.shade100 : Colors.green[50],
+                        color: _lightBlue.withOpacity(0.18),
                         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                       ),
                       child: Column(
@@ -819,7 +824,7 @@ class _HistoryPageState extends State<HistoryPage> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: isLearned ? Colors.teal.withValues(alpha: 0.3) : Colors.green[100],
+                                  color: _lightBlue.withOpacity(0.35),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -857,9 +862,11 @@ class _HistoryPageState extends State<HistoryPage> {
                                       IconButton(
                                         icon: const Icon(Icons.share, size: 18, color: Colors.black),
                                         onPressed: () {
-                                          Clipboard.setData(ClipboardData(text: item['translated'] ?? ''));
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Translation copied for sharing!'), duration: Duration(seconds: 1)),
+                                          final shareText = 'Original: ${item['original'] ?? ''}\n'
+                                              'Translation (${item['language']?.toUpperCase() ?? 'UNKNOWN'}): ${item['translated'] ?? ''}';
+                                          Share.share(
+                                            shareText,
+                                            subject: 'Translation from Zam Learn It',
                                           );
                                         },
                                         padding: EdgeInsets.zero,
